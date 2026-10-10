@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Product catalogue custom page</description>
+    <flexiPage>Product_Catalogue</flexiPage>
+    <label>Product Catalogue</label>
+    <motif>Custom55: Books</motif>
+</CustomTab>

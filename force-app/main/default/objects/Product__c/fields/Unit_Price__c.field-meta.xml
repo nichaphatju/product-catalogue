@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Unit_Price__c</fullName>
+    <description>The price charged for a single unit of this product. Changes are tracked for audit and catalogue display purposes.</description>
+    <inlineHelpText>Enter the unit price. Must be greater than 0.</inlineHelpText>
+    <label>Unit Price</label>
+    <precision>16</precision>
+    <required>true</required>
+    <scale>2</scale>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Currency</type>
+</CustomField>

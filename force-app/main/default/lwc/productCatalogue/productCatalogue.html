@@ -1,0 +1,200 @@
+<template>
+  <lightning-card title="Product Catalogue" icon-name="standard:product">
+    <div class="slds-var-p-horizontal_medium slds-var-p-bottom_medium">
+      <div class="slds-grid slds-gutters slds-wrap">
+        <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-3">
+          <lightning-combobox
+            name="categoryFilter"
+            label="Category"
+            value={categoryFilter}
+            options={categoryOptions}
+            onchange={handleCategoryChange}
+          ></lightning-combobox>
+        </div>
+      </div>
+    </div>
+
+    <template lwc:if={isLoading}>
+      <div class="slds-var-p-around_large slds-align_absolute-center">
+        <lightning-spinner
+          alternative-text="Loading products"
+          size="medium"
+        ></lightning-spinner>
+      </div>
+    </template>
+
+    <template lwc:elseif={errorMessage}>
+      <div class="slds-var-p-horizontal_medium slds-var-p-bottom_medium">
+        <div
+          class="slds-notify slds-notify_alert slds-theme_error"
+          role="alert"
+        >
+          <span class="slds-assistive-text">Error</span>
+          <h2>{errorMessage}</h2>
+        </div>
+      </div>
+    </template>
+
+    <template lwc:elseif={showEmptyState}>
+      <div
+        class="slds-var-p-around_large slds-illustration slds-illustration_small"
+      >
+        <p class="slds-text-heading_medium slds-var-p-bottom_small">
+          No products found
+        </p>
+        <p class="slds-text-body_regular">
+          Try choosing a different category, or check back once products have
+          been added.
+        </p>
+      </div>
+    </template>
+
+    <template lwc:else>
+      <table
+        class="slds-table slds-table_cell-buffer slds-table_bordered"
+        aria-label="Product catalogue"
+      >
+        <thead>
+          <tr class="slds-line-height_reset">
+            <th scope="col" aria-sort={nameColumnAriaSort}>
+              <button
+                class="slds-button slds-button_reset slds-truncate slds-th__action"
+                title="Sort by Name"
+                data-field="Name"
+                onclick={handleSortByColumn}
+              >
+                <span class="slds-grid slds-grid_vertical-align-center">
+                  <span>Name</span>
+                  <template lwc:if={isSortedByName}>
+                    <lightning-icon
+                      icon-name={sortIconName}
+                      size="xx-small"
+                      alternative-text={sortIconAlternativeText}
+                    ></lightning-icon>
+                  </template>
+                </span>
+              </button>
+            </th>
+            <th scope="col">
+              <div class="slds-truncate" title="Category">Category</div>
+            </th>
+            <th scope="col" aria-sort={priceColumnAriaSort}>
+              <button
+                class="slds-button slds-button_reset slds-truncate slds-th__action"
+                title="Sort by Unit Price"
+                data-field="Unit_Price__c"
+                onclick={handleSortByColumn}
+              >
+                <span class="slds-grid slds-grid_vertical-align-center">
+                  <span>Unit Price</span>
+                  <template lwc:if={isSortedByPrice}>
+                    <lightning-icon
+                      icon-name={sortIconName}
+                      size="xx-small"
+                      alternative-text={sortIconAlternativeText}
+                    ></lightning-icon>
+                  </template>
+                </span>
+              </button>
+            </th>
+            <th scope="col">
+              <div class="slds-truncate" title="Active">Active</div>
+            </th>
+            <th scope="col">
+              <div class="slds-truncate" title="Price History">
+                Price History
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <template for:each={rows} for:item="row">
+            <tr key={row.id} class="slds-hint-parent">
+              <th scope="row">
+                <div class="slds-truncate" title={row.name}>{row.name}</div>
+              </th>
+              <td>
+                <div class="slds-truncate" title={row.category}>
+                  {row.category}
+                </div>
+              </td>
+              <td>
+                <lightning-formatted-number
+                  value={row.unitPrice}
+                  format-style="currency"
+                ></lightning-formatted-number>
+              </td>
+              <td>
+                <lightning-input
+                  type="toggle"
+                  label={row.toggleLabel}
+                  variant="label-hidden"
+                  checked={row.isActive}
+                  data-id={row.id}
+                  onchange={handleToggleActive}
+                ></lightning-input>
+              </td>
+              <td>
+                <lightning-button
+                  variant="base"
+                  label={row.historyButtonLabel}
+                  data-id={row.id}
+                  onclick={handleToggleHistory}
+                ></lightning-button>
+              </td>
+            </tr>
+            <template lwc:if={row.isExpanded}>
+              <tr key={row.historyRowKey}>
+                <td colspan="5" class="slds-theme_shade">
+                  <template lwc:if={row.isLoadingHistory}>
+                    <lightning-spinner
+                      alternative-text="Loading price history"
+                      size="small"
+                    ></lightning-spinner>
+                  </template>
+                  <template lwc:elseif={row.historyError}>
+                    <p class="slds-text-color_error">{row.historyError}</p>
+                  </template>
+                  <template lwc:elseif={row.showHistoryEmptyState}>
+                    <p>
+                      No price changes have been recorded for this product yet.
+                    </p>
+                  </template>
+                  <template lwc:else>
+                    <ul class="slds-list_dotted">
+                      <template for:each={row.history} for:item="change">
+                        <li
+                          key={change.changedDate}
+                          class="slds-var-p-vertical_xx-small"
+                        >
+                          <lightning-formatted-date-time
+                            value={change.changedDate}
+                            year="numeric"
+                            month="short"
+                            day="2-digit"
+                            hour="2-digit"
+                            minute="2-digit"
+                          ></lightning-formatted-date-time>
+                          -
+                          <lightning-formatted-number
+                            value={change.oldValue}
+                            format-style="currency"
+                          ></lightning-formatted-number>
+                          &rarr;
+                          <lightning-formatted-number
+                            value={change.newValue}
+                            format-style="currency"
+                          ></lightning-formatted-number>
+                        </li>
+                      </template>
+                    </ul>
+                  </template>
+                </td>
+              </tr>
+            </template>
+          </template>
+        </tbody>
+      </table>
+    </template>
+  </lightning-card>
+</template>
